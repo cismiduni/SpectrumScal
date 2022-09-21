@@ -7,6 +7,8 @@ from PIL import Image
 # plt.style.use('science')
 import io
 from pathlib import Path, PurePath
+from numba import njit
+
 
 
 
@@ -141,12 +143,13 @@ if uploaded_files[0] is not None:
                    np.transpose((np.append(t[:-1],np.append(np.append(Ag_EO,Ag_NS),np.append(Ag_corr_EO,Ag_corr_NS)))).reshape((5,len(Ag_corr_NS)))))
 
     else:
-        t = np.loadtxt('.\\Acelerogramas.txt')[:,0]
-        t = np.append(t,np.array([0.0]))
-        Ag_EO = np.loadtxt('.\\Acelerogramas.txt')[:,1]
-        Ag_NS = np.loadtxt('.\\Acelerogramas.txt')[:,2]
-        Ag_corr_EO = np.loadtxt('.\\Acelerogramas.txt')[:,3]
-        Ag_corr_NS = np.loadtxt('.\\Acelerogramas.txt')[:,4]
+        t, Ag_EO, Ag_NS, Ag_corr_EO, Ag_corr_NS = carchivos('.\\Acelerogramas.txt')
+        # t = np.loadtxt('.\\Acelerogramas.txt')[:,0]
+        # t = np.append(t,np.array([0.0]))
+        # Ag_EO = np.loadtxt('.\\Acelerogramas.txt')[:,1]
+        # Ag_NS = np.loadtxt('.\\Acelerogramas.txt')[:,2]
+        # Ag_corr_EO = np.loadtxt('.\\Acelerogramas.txt')[:,3]
+        # Ag_corr_NS = np.loadtxt('.\\Acelerogramas.txt')[:,4]
 
         ndatos = np.zeros(nregistros)
         dt = np.zeros(nregistros)
@@ -275,7 +278,7 @@ FE = np.zeros(nregistros)
 with st.sidebar.container():
     st.write("Factores de Escalamiento")
     for i in range(nregistros):
-        FE[i] = st.sidebar.number_input(f'FE {i+1}', 0.1, 20.1, 1.0)
+        FE[i] = st.sidebar.number_input(f'FE {i+1}', 0.1, 50.1, 1.0)
 
 with tab3:
     for i in range(nregistros):

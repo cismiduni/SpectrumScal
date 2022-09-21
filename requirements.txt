@@ -4,3 +4,4 @@ pandas
 streamlit
 scipy
 pathlib
+numba

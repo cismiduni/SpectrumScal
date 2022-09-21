@@ -1,7 +1,10 @@
 import numpy as np
 from scipy import fftpack, signal
 from signal import valid_signals
+from numba import njit
 
+# @jit('float64[:,:](int32)',nopython=True,fastmath= True)
+@njit(parallel=True,fastmath=True)
 def intsignal(dt0, Accg0, ndatos0):
     ''' Función que interpola el registro de aceleraciones para una mayor discretización de datos
     input
@@ -15,6 +18,7 @@ def intsignal(dt0, Accg0, ndatos0):
     '''
     #Preproces. señal aumentar puntos dt (fmuestreo Hz)
     # Nyquist
+    ndatos0 = int(ndatos0)
     dt = dt0/4
     nint = int(dt0/dt) # número de intervalos de interpolación
     ndatos = (ndatos0-1)*nint + 1
@@ -29,8 +33,9 @@ def intsignal(dt0, Accg0, ndatos0):
             k += 1
     return Accg, ndatos, dt
 
+@njit(parallel=True,fastmath=True)
 def NewmarkBeta(ndatos, Accg, dt, masa, T, h):
-    ''' Función que aplica el método de Newmark beta a un registro de aceleraciones
+    ''' Función que aplica el método de Newmark bet@njit(parallel=True)a a un registro de aceleraciones
     input
     Accg:       registro de aceleraciones
     ndatos:     tamaño del registro
@@ -42,7 +47,7 @@ def NewmarkBeta(ndatos, Accg, dt, masa, T, h):
     retorna
     amax: Aceleración absoluta máxima
     '''
-    
+    ndatos = int(ndatos)
     w = 2*np.pi/T #frecuencia angular
     c = 2*h*w*masa
     k = masa*w**2 #rigidez
@@ -70,6 +75,7 @@ def NewmarkBeta(ndatos, Accg, dt, masa, T, h):
     
     amax = np.amax(np.absolute(aAcc))
     return amax
+
 
 def Filt_Corr(Ag,dt,n,f1=0.1,f2=25):
     '''
@@ -101,9 +107,10 @@ def Filt_Corr(Ag,dt,n,f1=0.1,f2=25):
    
     return Ag
 
-
+@njit(parallel=True,fastmath=True)
 def spectro(Accg,ndatos,dt,masa):
-    T = np.arange(0.0,5.01,0.01,dtype = 'double')
+    n = int(5/0.01+1)
+    T = np.linspace(0,5,n)
     T[0] = 0.02
     nT = T.shape[0]
 
@@ -122,3 +129,13 @@ def spectro(Accg,ndatos,dt,masa):
             
     return Sa, T
 
+
+def carchivos(file):
+    t = np.loadtxt(file)[:,0]
+    t = np.append(t,np.array([0.0]))
+    Ag_EO = np.loadtxt(file)[:,1]
+    Ag_NS = np.loadtxt(file)[:,2]
+    Ag_corr_EO = np.loadtxt(file)[:,3]
+    Ag_corr_NS = np.loadtxt(file)[:,4]
+    
+    return t, Ag_EO, Ag_NS, Ag_corr_EO, Ag_corr_NS
