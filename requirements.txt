@@ -2,6 +2,5 @@ numpy
 matplotlib
 pandas
 streamlit
-scipy
 pathlib
 numba

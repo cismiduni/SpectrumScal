@@ -1,6 +1,6 @@
 import numpy as np
-from scipy import fftpack, signal
-from signal import valid_signals
+# from scipy import fftpack, signal
+# from signal import valid_signals
 from numba import njit
 
 # @jit('float64[:,:](int32)',nopython=True,fastmath= True)
@@ -77,41 +77,41 @@ def NewmarkBeta(ndatos, Accg, dt, masa, T, h):
     return amax
 
 
-def Filt_Corr(Ag,dt,n,f1=0.1,f2=25):
-    '''
-    Función que calcula la velocidad y los desplazamientos a partir de la aceleración:
+# def Filt_Corr(Ag,dt,n,f1=0.1,f2=25):
+#     '''
+#     Función que calcula la velocidad y los desplazamientos a partir de la aceleración:
     
-    inputs:
-    Ag: aceleración del suelo
-    dt: intervalo de tiempo de muestreo
-    n: número de datos
-    f1: 0.1 #frecuencia mínima en Hz
-    f2: 25 #frecuencia máxima en Hz
+#     inputs:
+#     Ag: aceleración del suelo
+#     dt: intervalo de tiempo de muestreo
+#     n: número de datos
+#     f1: 0.1 #frecuencia mínima en Hz
+#     f2: 25 #frecuencia máxima en Hz
     
-    outputs:
-    Ag: Aceleración corregida
-    '''
+#     outputs:
+#     Ag: Aceleración corregida
+#     '''
     
-    fm = 1/dt
-    #Filtro de señal por paso de banda
-    sos = signal.butter(4, [f1,f2], btype='bandpass', fs=fm, output='sos') 
-    Ag = signal.sosfilt(sos, Ag)
+#     fm = 1/dt
+#     #Filtro de señal por paso de banda
+#     sos = signal.butter(4, [f1,f2], btype='bandpass', fs=fm, output='sos') 
+#     Ag = signal.sosfilt(sos, Ag)
     
     
-    #Corrección de la velocidad por linea base
-    win=signal.parzen(fm)
-    smoothAg=np.zeros(n)
-    smoothAg = signal.convolve(Ag, win, mode='same') / sum(win)
-    Ag=Ag-smoothAg
+#     #Corrección de la velocidad por linea base
+#     win=signal.parzen(fm)
+#     smoothAg=np.zeros(n)
+#     smoothAg = signal.convolve(Ag, win, mode='same') / sum(win)
+#     Ag=Ag-smoothAg
         
    
-    return Ag
+    # return Ag
 
 @njit(parallel=True,fastmath=True)
 def spectro(Accg,ndatos,dt,masa):
-    n = int(5/0.01+1)
+    n = int(5/0.025+1)
     T = np.linspace(0,5,n)
-    T[0] = 0.02
+    T[0] = 0.025
     nT = T.shape[0]
 
     h = 0.05
@@ -135,7 +135,5 @@ def carchivos(file):
     t = np.append(t,np.array([0.0]))
     Ag_EO = np.loadtxt(file)[:,1]
     Ag_NS = np.loadtxt(file)[:,2]
-    Ag_corr_EO = np.loadtxt(file)[:,3]
-    Ag_corr_NS = np.loadtxt(file)[:,4]
     
-    return t, Ag_EO, Ag_NS, Ag_corr_EO, Ag_corr_NS
+    return t, Ag_EO, Ag_NS

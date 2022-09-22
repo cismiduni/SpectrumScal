@@ -124,33 +124,27 @@ if uploaded_files[0] is not None:
             i0[i] = int(round(np.argwhere(t==0)[i][0],0))
         # st.write(i0)
 
-        #Filtrado y correción por línea base
-        Ag_corr_EO = []
-        Ag_corr_NS = []
+#         #Filtrado y correción por línea base
+#         Ag_corr_EO = []
+#         Ag_corr_NS = []
 
-        for i in range(nregistros):
-            #Frecuencia de Nyquist, discretización
-            aux_EO = Filt_Corr(Ag_EO[int(i0[i]):int(i0[i+1])],dt[i],ndatos[i],f1=0.1,f2=25)
-            aux_NS = Filt_Corr(Ag_NS[int(i0[i]):int(i0[i+1])],dt[i],ndatos[i],f1=0.1,f2=25)
+#         for i in range(nregistros):
+#             #Frecuencia de Nyquist, discretización
+#             aux_EO = Filt_Corr(Ag_EO[int(i0[i]):int(i0[i+1])],dt[i],ndatos[i],f1=0.1,f2=25)
+#             aux_NS = Filt_Corr(Ag_NS[int(i0[i]):int(i0[i+1])],dt[i],ndatos[i],f1=0.1,f2=25)
 
-            Ag_corr_EO = Ag_corr_EO + list(aux_EO)
-            Ag_corr_NS = Ag_corr_NS + list(aux_NS)
+#             Ag_corr_EO = Ag_corr_EO + list(aux_EO)
+#             Ag_corr_NS = Ag_corr_NS + list(aux_NS)
 
-        Ag_corr_EO = np.array(Ag_corr_EO)
-        Ag_corr_NS = np.array(Ag_corr_NS)
+#         Ag_corr_EO = np.array(Ag_corr_EO)
+#         Ag_corr_NS = np.array(Ag_corr_NS)
 
         np.savetxt('.\\Acelerogramas.txt',
-                   np.transpose((np.append(t[:-1],np.append(np.append(Ag_EO,Ag_NS),np.append(Ag_corr_EO,Ag_corr_NS)))).reshape((5,len(Ag_corr_NS)))))
+                   np.transpose((np.append(t[:-1],np.append(Ag_EO,Ag_NS))).reshape((3,len(Ag_NS)))) )
 
     else:
-        t, Ag_EO, Ag_NS, Ag_corr_EO, Ag_corr_NS = carchivos('.\\Acelerogramas.txt')
-        # t = np.loadtxt('.\\Acelerogramas.txt')[:,0]
-        # t = np.append(t,np.array([0.0]))
-        # Ag_EO = np.loadtxt('.\\Acelerogramas.txt')[:,1]
-        # Ag_NS = np.loadtxt('.\\Acelerogramas.txt')[:,2]
-        # Ag_corr_EO = np.loadtxt('.\\Acelerogramas.txt')[:,3]
-        # Ag_corr_NS = np.loadtxt('.\\Acelerogramas.txt')[:,4]
-
+        t, Ag_EO, Ag_NS= carchivos('.\\Acelerogramas.txt')
+        
         ndatos = np.zeros(nregistros)
         dt = np.zeros(nregistros)
 
@@ -169,10 +163,10 @@ if uploaded_files[0] is not None:
 
 if direccion == 'EO':
     Ag = Ag_EO
-    Ag_corr = Ag_corr_EO
+    # Ag_corr = Ag_corr_EO
 else:
     Ag = Ag_NS
-    Ag_corr = Ag_corr_NS
+    # Ag_corr = Ag_corr_NS
 
 #Espectro de la norma de diseño Sismorresistente E030
 periodo_P = {'S0':0.3,'S1':0.4,'S2':0.6,'S3':1.0,} #TP
@@ -199,8 +193,8 @@ z = zona[Z]
 TP = periodo_P[S]
 TL = periodo_L[S]
 
-T = np.arange(0.0,5.01,0.01,dtype = 'double')
-T[0] = 0.02
+T = np.arange(0.0,5.01,0.025,dtype = 'double')
+T[0] = 0.025
 C = np.zeros(T.shape[0])
 
 ii = 0
@@ -228,7 +222,7 @@ fig3, ax3 = plt.subplots(nregistros,1,constrained_layout=True,facecolor=(1, 1, 1
 fig4, ax4 = plt.subplots(constrained_layout=True,facecolor=(1, 1, 1, 1),figsize=(15,8))
 # fig5, ax5 = plt.subplots(constrained_layout=True,facecolor=(1, 1, 1, 1),figsize=(12,8))    
 
-tab1, tab2, tab3, tab4 = st.tabs(["Señales Originales", "Señales Filtradas y Corregidas","Espectros: SRSS", "Espectro Promedio"])
+tab1, tab2, tab3 = st.tabs(["Señales Originales","Espectros: SRSS", "Espectro Promedio"])
 
 
 
@@ -245,15 +239,15 @@ with tab1:
 
 
 
-with tab2:
-    for i in range(nregistros):
-        ax2[i].plot(t[int(i0[i]):int(i0[i+1])],Ag_corr[int(i0[i]):int(i0[i+1])], 'blue', linewidth=1)
-        ax2[i].set_title(f'Aceleración del Suelo {nombre_registros[i]}', fontsize=20, fontweight = 'bold')
-        ax2[i].set_xlabel('Time (s)', fontsize=15, fontweight = 'bold')
-        ax2[i].set_ylabel('Aceleración (gal)', fontsize=15, fontweight = 'bold')
-        ax2[i].tick_params(labelsize=12)
-        ax2[i].legend(loc='best', fontsize=15)
-    st.pyplot(fig2)
+# with tab2:
+#     for i in range(nregistros):
+#         ax2[i].plot(t[int(i0[i]):int(i0[i+1])],Ag_corr[int(i0[i]):int(i0[i+1])], 'blue', linewidth=1)
+#         ax2[i].set_title(f'Aceleración del Suelo {nombre_registros[i]}', fontsize=20, fontweight = 'bold')
+#         ax2[i].set_xlabel('Time (s)', fontsize=15, fontweight = 'bold')
+#         ax2[i].set_ylabel('Aceleración (gal)', fontsize=15, fontweight = 'bold')
+#         ax2[i].tick_params(labelsize=12)
+#         ax2[i].legend(loc='best', fontsize=15)
+#     st.pyplot(fig2)
 
 # Espectro
 Sa_EO = np.zeros(nregistros*len(T))
@@ -262,8 +256,8 @@ Sa_NS = np.zeros(nregistros*len(T))
 if open(".\\Espectros.txt",'r').read()=='':    
     #Cálculo de espectros Sa
     for i in range(nregistros):
-        Sa_EO[i*len(T):(i+1)*len(T)], T = spectro(Ag_corr_EO[int(i0[i]):int(i0[i+1])],ndatos[i],dt[i],masa=1.0)
-        Sa_NS[i*len(T):(i+1)*len(T)], T = spectro(Ag_corr_NS[int(i0[i]):int(i0[i+1])],ndatos[i],dt[i],masa=1.0) 
+        Sa_EO[i*len(T):(i+1)*len(T)], T = spectro(Ag_EO[int(i0[i]):int(i0[i+1])],ndatos[i],dt[i],masa=1.0)
+        Sa_NS[i*len(T):(i+1)*len(T)], T = spectro(Ag_NS[int(i0[i]):int(i0[i+1])],ndatos[i],dt[i],masa=1.0) 
 
     np.savetxt('.\\Espectros.txt',np.transpose(np.append(Sa_EO,Sa_NS).reshape((2,len(Sa_EO)))))
 else:
@@ -280,7 +274,7 @@ with st.sidebar.container():
     for i in range(nregistros):
         FE[i] = st.sidebar.number_input(f'FE {i+1}', 0.1, 50.1, 1.0)
 
-with tab3:
+with tab2:
     for i in range(nregistros):
         ax3[i].plot(T,FE[i]*Sa[i*len(T):(i+1)*len(T)], 'blue', linewidth=2,label=(f"registro_FE = {FE[i]:.2f}"))
         ax3[i].plot(T,Sa_e030, 'red', linewidth=2,label='E030')
@@ -301,7 +295,7 @@ for i in range(nregistros):
     Sa_prom += FE[i]*Sa[i*len(T):(i+1)*len(T)]
 Sa_prom = Sa_prom/nregistros
 
-with tab4:
+with tab3:
     ax4.plot(T,Sa_prom, 'blue', linewidth=2,label="Sa_Promedio")
     ax4.plot(T,Sa_e030, 'red', linewidth=2,label='E030')
     ax4.set_title('Espectro de Pseudo-Aceleraciones', fontsize=20, fontweight = 'bold')
@@ -318,8 +312,8 @@ with tab4:
     i = 0
     for archivo in uploaded_files:
         name ='escal_'+archivo.name  
-        aux_EO = FE[i]*Ag_corr_EO[int(i0[i]):int(i0[i+1])]
-        aux_NS = FE[i]*Ag_corr_NS[int(i0[i]):int(i0[i+1])]
+        aux_EO = FE[i]*Ag_EO[int(i0[i]):int(i0[i+1])]
+        aux_NS = FE[i]*Ag_NS[int(i0[i]):int(i0[i+1])]
         # np.savetxt('.\\Registros_Escalados\\'+name,
         # np.transpose(np.append(t[int(i0[i]):int(i0[i+1])],np.append(aux_EO,aux_NS)).reshape((3,len(aux_EO)))))
         resultados = np.transpose(np.append(t[int(i0[i]):int(i0[i+1])],np.append(aux_EO,aux_NS)).reshape((3,len(aux_EO))))
